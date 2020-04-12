@@ -1,7 +1,7 @@
 PROG = BestFirstSearch
 FLAGS = -Wall -Wextra -DDEBUG -g -std=c++14
 
-all: $(PROG1)
+all: $(PROG)
 $(PROG): $(PROG).o
 	g++ $(FLAGS) $(PROG).o -o $(PROG)
 $(PROG).o: $(PROG).cpp
