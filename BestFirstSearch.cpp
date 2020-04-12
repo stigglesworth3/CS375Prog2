@@ -13,6 +13,12 @@ int main(int argc, char *argv[])
 	string toBeSplit;
 	inputFile >> toBeSplit;
 
+	size_t comma = toBeSplit.find(",");
+	string totalItems = toBeSplit.substr(0, comma);
+	string totalWeight =toBeSplit.substr(comma+1);
+	int numItems = stoi(totalItems);
+	int sackWeight = stoi(totalWeight);
+
 	outFile.close();
 	return 0;
 }
