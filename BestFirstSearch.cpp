@@ -9,6 +9,7 @@ struct singleItem
 {
 	int weight;
 	int profit;
+	double profitToWeight;
 };
 typedef struct singleItem item;
 
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
 		comma = toBeSplit.find(",");
 		nItem.weight = stoi(toBeSplit.substr(0, comma));
 		nItem.profit = stoi(toBeSplit.substr(comma+1));
+		nItem.profitToWeight = (nItem.profit)/(nItem.weight);
 		items.push_back(nItem);
 	}
 
