@@ -66,11 +66,6 @@ int bound(Node v, int numItems, int sackWeight, item items[])
 
 int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 {
-	int picked[numItems];
-	for (int a=0; a<numItems; a++)
-	{
-		picked[a] = 0;
-	}
 	int numLeaves = 0, numNodes = 0;
 	Node bestNode;
 
@@ -99,6 +94,7 @@ int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 		next.level = curr.level+1;
 		next.weight = curr.weight + items[next.level].weight;
 		next.profit = curr.profit + items[next.level].profit;
+		//next.contain = curr.contain;
 
 		if (next.weight <= sackWeight && next.profit > maxProfit)
 		{
@@ -118,9 +114,11 @@ int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 		next.weight = curr.weight;
 		next.profit = curr.profit;
 		next.bound = bound(next, numItems, sackWeight, items);
+		//next.contain = curr.contain;
 		if (next.bound > maxProfit)
 		{
 			q.push(next);
+			//next.contain = curr.contain;
 		}
 	}
 	
