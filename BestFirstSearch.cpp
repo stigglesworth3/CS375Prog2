@@ -4,13 +4,12 @@
 
 using namespace std;
 
-struct singleItem
+struct item
 {
 	double weight;
 	double profit;
 	double profitToWeight;
 };
-typedef struct singleItem item;
 
 void bSort(item items[], int size)
 {
@@ -57,11 +56,6 @@ int main(int argc, char *argv[])
 		items[i] = nItem;
 	}
 	bSort(items, numItems);
-
-	for (int k=0; k<numItems; k++)
-	{
-		outFile << items[k].profitToWeight << endl;
-	}
 
 	outFile.close();
 	return 0;
