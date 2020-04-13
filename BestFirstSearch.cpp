@@ -38,20 +38,12 @@ int main(int argc, char *argv[])
 		nItem.weight = stoi(toBeSplit.substr(0, comma));
 		nItem.profit = stoi(toBeSplit.substr(comma+1));
 		nItem.profitToWeight = (nItem.profit)/(nItem.weight);
-		int inserted = 0;
-		for (int j=0; j<items.size(); j++)
-		{
-			if (items[j].proftitToWeight < nItem.profitToWeight)
-			{
-				items.insert(j, nItem);
-				inserted = 1;
-				break;
-			}
-		}
-		if (inserted == 0)
-		{
-			items.push_back(nItem);
-		}
+		items.push_back(nItem);
+	}
+
+	for (int k=0; k<items.size(); k++)
+	{
+		outFile << items[k].profitToWeight;
 	}
 
 	outFile.close();
