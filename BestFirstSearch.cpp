@@ -1,12 +1,11 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
 #include <queue>
 
 using namespace std;
 
-int numLeaves = 0;
-int numNodes = 0;
 
 struct item
 {
@@ -21,6 +20,7 @@ struct Node
 	double profit;
 	double bound;
 	double weight;
+	vector<int> contain;
 };
 
 void bSort(item items[], int size)
@@ -64,8 +64,16 @@ int bound(Node v, int numItems, int sackWeight, item items[])
 	return profitBound;
 }
 
-int knapsack01(int sackWeight, item items[], int numItems)
+int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 {
+	int picked[numItems];
+	for (int a=0; a<numItems; a++)
+	{
+		picked[a] = 0;
+	}
+	int numLeaves = 0, numNodes = 0;
+	Node bestNode;
+
 	queue<Node> q;
 	Node curr, next;
 
@@ -85,7 +93,6 @@ int knapsack01(int sackWeight, item items[], int numItems)
 		}
 		if (curr.level == numItems-1)
 		{
-			numLeaves++;
 			continue;
 		}
 
@@ -96,6 +103,7 @@ int knapsack01(int sackWeight, item items[], int numItems)
 		if (next.weight <= sackWeight && next.profit > maxProfit)
 		{
 			maxProfit = next.profit;
+			bestNode = next;
 		}
 
 		next.bound = bound(next, numItems, sackWeight, items);
@@ -103,6 +111,8 @@ int knapsack01(int sackWeight, item items[], int numItems)
 		if (next.bound > maxProfit)
 		{
 			q.push(next);
+			next.contain = curr.contain;
+			next.contain.push_back(next.level);
 		}
 
 		next.weight = curr.weight;
@@ -113,14 +123,29 @@ int knapsack01(int sackWeight, item items[], int numItems)
 			q.push(next);
 		}
 	}
+	
+	ofstream outFile;
+	outFile.open(fileName);
+
+
+	outFile <<numItems << "," << maxProfit << ","<< bestNode.contain.size() << endl;
+
+	outFile << numNodes << "," << numLeaves << endl;
+
+	for (int w=0; w<bestNode.contain.size(); w++)
+	{
+		outFile << items[bestNode.contain[w]].weight << "," << items[bestNode.contain[w]].profit << endl;
+	}
+
 	return maxProfit;
 }
 
 int main(int argc, char *argv[])
 {
 	ifstream inputFile(argv[1]);
-	ofstream outFile;
-	outFile.open(argv[2]);
+	//ofstream outFile;
+	//outFile.open(argv[2]);
+	string fileName  = argv[2];
 
 	string toBeSplit;
 	inputFile >> toBeSplit;
@@ -131,7 +156,7 @@ int main(int argc, char *argv[])
 	int numItems = stoi(totalItems);
 	int sackWeight = stoi(totalWeight);
 	
-	outFile << numItems << ",";
+	//outFile << numItems << ",";
 
 	item items[numItems];
 
@@ -147,10 +172,10 @@ int main(int argc, char *argv[])
 		items[i] = nItem;
 	}
 	bSort(items, numItems);
-	int optProfit = knapsack01(sackWeight, items, numItems);
-	outFile << optProfit << "," << endl;
-	outFile << numLeaves << endl;
+	int optProfit = knapsack01(sackWeight, items, numItems, fileName);
+	//outFile << optProfit << "," << endl;
+	//outFile << numLeaves << endl;
 
-	outFile.close();
+	//outFile.close();
 	return 0;
 }
