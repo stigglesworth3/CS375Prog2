@@ -23,6 +23,7 @@ struct Node
 	vector<int> contain; //list of the items that are included in this node
 };
 
+//comparator for the priority queue
 struct compBound
 {
 	bool operator() (Node const& node1, Node const& node2)
@@ -31,6 +32,9 @@ struct compBound
 	}
 };
 
+//this function sorts the items by profit to weight ratio in decreasing order using bubble sort
+////item items[] - is an array of item structs
+//int size - the number of items
 void bSort(item items[], int size)
 {
 	for (int i=0; i<size-1; i++)
@@ -39,7 +43,7 @@ void bSort(item items[], int size)
 		{
 			if (items[j].profitToWeight < items[j+1].profitToWeight)
 			{
-				item temp = items[j];
+				item temp = items[j]; //temp variable to allow swapping
 				items[j] = items[j+1];
 				items[j+1] = temp;
 			}
@@ -47,15 +51,20 @@ void bSort(item items[], int size)
 	}
 }
 
+//bound find the max possible proit for any node to serve as its bound
+//Node v - the current node
+//int numItems - the total number of items
+//saint sackweight - the max weight of the knapsack
+//item items[] - array of all the items
 int bound(Node v, int numItems, int sackWeight, item items[])
 {
 	if (v.weight > sackWeight)
 	{
 		return 0;
 	}
-	double profitBound = v.profit;
-	int nLevel = v.level+1;
-	int totalWeight = v.weight;
+	double profitBound = v.profit; //running total the max possible profit (bound)
+	int nLevel = v.level+1; //keep track of which level currently on
+	int totalWeight = v.weight; //running total of the weight of included items
 
 	while ((nLevel < numItems) && (totalWeight + items[nLevel].weight <= sackWeight))
 	{
@@ -72,14 +81,19 @@ int bound(Node v, int numItems, int sackWeight, item items[])
 	return profitBound;
 }
 
+//runs the  best first branch and bound 0/1 knapsack algorithm
+//int sackweight - the max weight of the knapsack
+//item items[] - an array of all the items
+//int numItems - the total number of items
+//string filename - the filename for output
 int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 {
-	int numLeaves = 0;
-	int numNodes = 1;
-	vector<int> bestList;
+	int numLeaves = 0; //total nodes visited
+	int numNodes = 1; //total leaf nodes visited 
+	vector<int> bestList; //list of the items included in the optimal solution
 
-	priority_queue<Node, vector<Node>, compBound> q;
-	Node curr, next;
+	priority_queue<Node, vector<Node>, compBound> q; //queue of nodes to search
+	Node curr, next; //curr - the node currently worked on, next - the next node either with or without the next item
 
 	curr.level = -1;
 	curr.profit = curr.weight = 0;
@@ -98,6 +112,7 @@ int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 			continue;
 		}
 
+		//include item
 		next.level = curr.level+1;
 		next.weight = curr.weight + items[next.level].weight;
 		next.profit = curr.profit + items[next.level].profit;
@@ -125,6 +140,7 @@ int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 		}
 		numNodes++;
 
+		//exclude item
 		next.weight = curr.weight;
 		next.profit = curr.profit;
 		next.bound = bound(next, numItems, sackWeight, items);
@@ -158,23 +174,23 @@ int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 
 int main(int argc, char *argv[])
 {
-	ifstream inputFile(argv[1]);
-	string fileName  = argv[2];
+	ifstream inputFile(argv[1]); //input filename
+	string fileName  = argv[2]; //output filename
 
-	string toBeSplit;
+	string toBeSplit; //the next line of read in vaules that need to be split into the correct parts
 	inputFile >> toBeSplit;
 
-	size_t comma = toBeSplit.find(",");
-	string totalItems = toBeSplit.substr(0, comma);
-	string totalWeight = toBeSplit.substr(comma+1);
-	int numItems = stoi(totalItems);
-	int sackWeight = stoi(totalWeight);
+	size_t comma = toBeSplit.find(","); //location in string where the , is
+	string totalItems = toBeSplit.substr(0, comma); //total number of items as a string
+	string totalWeight = toBeSplit.substr(comma+1); //max allowed weight as a string
+	int numItems = stoi(totalItems); //total numnber of items as an int
+	int sackWeight = stoi(totalWeight); //max allowed weight as an int
 	
-	item items[numItems];
+	item items[numItems]; //array of all the items
 
 	for (int i=0; i<numItems; i++)
 	{
-		item nItem;
+		item nItem; //a new item to be added
 		inputFile >> toBeSplit;
 		comma = toBeSplit.find(",");
 		nItem.weight = stod(toBeSplit.substr(0, comma));
