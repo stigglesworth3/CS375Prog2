@@ -9,18 +9,18 @@ using namespace std;
 
 struct item
 {
-	double weight;
-	double profit;
-	double profitToWeight;
+	double weight; //weight of an item
+	double profit; //profit for an item
+	double profitToWeight; //an item's profit to weight ratio
 };
 
 struct Node
 {
-	int level;
-	double profit;
-	double bound;
-	double weight;
-	vector<int> contain;
+	int level; //what level of the tree a node is on
+	double profit; //the sum of the profit of all the itmes included on the path to this node
+	double bound; //highest possible profit for nodes that could be added
+	double weight; //total weight of all included items for this node
+	vector<int> contain; //list of the items that are included in this node
 };
 
 struct compBound
