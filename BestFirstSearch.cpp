@@ -23,6 +23,14 @@ struct Node
 	vector<int> contain;
 };
 
+struct compBound
+{
+	bool operator() (Node const& node1, Node const& node2)
+	{
+		return node1.bound < node2.bound;
+	}
+};
+
 void bSort(item items[], int size)
 {
 	for (int i=0; i<size-1; i++)
@@ -41,7 +49,7 @@ void bSort(item items[], int size)
 
 int bound(Node v, int numItems, int sackWeight, item items[])
 {
-	if (v.weight >= sackWeight)
+	if (v.weight > sackWeight)
 	{
 		return 0;
 	}
@@ -66,73 +74,83 @@ int bound(Node v, int numItems, int sackWeight, item items[])
 
 int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 {
-	int numLeaves = 0, numNodes = 0;
-	Node bestNode;
+	int numLeaves = 0;
+	int numNodes = 1;
+	vector<int> bestList;
 
-	queue<Node> q;
+	priority_queue<Node, vector<Node>, compBound> q;
 	Node curr, next;
 
 	curr.level = -1;
 	curr.profit = curr.weight = 0;
+	curr.bound = bound(curr, numItems, sackWeight, items);
 	q.push(curr);
 
 	int maxProfit = 0;
 	while (!q.empty())
 	{
-		curr = q.front();
+		curr = q.top();
 		q.pop();
 
-		if (curr.level == -1)
+		if (curr.bound <= maxProfit)
 		{
-			next.level = 0;
-		}
-		if (curr.level == numItems-1)
-		{
+			numLeaves++;
 			continue;
 		}
 
 		next.level = curr.level+1;
 		next.weight = curr.weight + items[next.level].weight;
 		next.profit = curr.profit + items[next.level].profit;
-		//next.contain = curr.contain;
 
 		if (next.weight <= sackWeight && next.profit > maxProfit)
 		{
 			maxProfit = next.profit;
-			bestNode = next;
 		}
-
+		next.contain = curr.contain;
 		next.bound = bound(next, numItems, sackWeight, items);
 		
-		if (next.bound > maxProfit)
+		if (next.bound >= maxProfit)
 		{
-			q.push(next);
-			next.contain = curr.contain;
 			next.contain.push_back(next.level);
+			q.push(next);
+			if (next.profit == maxProfit)
+			{
+				bestList = next.contain;
+			}
+			next.contain.pop_back();
 		}
+		else
+		{
+			numLeaves++;
+		}
+		numNodes++;
 
 		next.weight = curr.weight;
 		next.profit = curr.profit;
 		next.bound = bound(next, numItems, sackWeight, items);
-		//next.contain = curr.contain;
-		if (next.bound > maxProfit)
+		
+		if (next.bound >= maxProfit)
 		{
 			q.push(next);
-			//next.contain = curr.contain;
 		}
+		else
+		{
+			numLeaves++;
+		}
+		numNodes++;
 	}
 	
 	ofstream outFile;
 	outFile.open(fileName);
 
 
-	outFile <<numItems << "," << maxProfit << ","<< bestNode.contain.size() << endl;
+	outFile <<numItems << "," << maxProfit << ","<< bestList.size() << endl;
 
 	outFile << numNodes << "," << numLeaves << endl;
 
-	for (int w=0; w<bestNode.contain.size(); w++)
+	for (int w=0; w<bestList.size(); w++)
 	{
-		outFile << items[bestNode.contain[w]].weight << "," << items[bestNode.contain[w]].profit << endl;
+		outFile << items[bestList[w]].weight << "," << items[bestList[w]].profit << endl;
 	}
 
 	return maxProfit;
@@ -141,8 +159,6 @@ int knapsack01(int sackWeight, item items[], int numItems, string fileName)
 int main(int argc, char *argv[])
 {
 	ifstream inputFile(argv[1]);
-	//ofstream outFile;
-	//outFile.open(argv[2]);
 	string fileName  = argv[2];
 
 	string toBeSplit;
@@ -154,8 +170,6 @@ int main(int argc, char *argv[])
 	int numItems = stoi(totalItems);
 	int sackWeight = stoi(totalWeight);
 	
-	//outFile << numItems << ",";
-
 	item items[numItems];
 
 	for (int i=0; i<numItems; i++)
@@ -166,14 +180,10 @@ int main(int argc, char *argv[])
 		nItem.weight = stod(toBeSplit.substr(0, comma));
 		nItem.profit = stod(toBeSplit.substr(comma+1));
 		nItem.profitToWeight = (nItem.profit)/(nItem.weight);
-		cout << nItem.profitToWeight << endl;
 		items[i] = nItem;
 	}
 	bSort(items, numItems);
-	int optProfit = knapsack01(sackWeight, items, numItems, fileName);
-	//outFile << optProfit << "," << endl;
-	//outFile << numLeaves << endl;
-
-	//outFile.close();
+	knapsack01(sackWeight, items, numItems, fileName);
+	
 	return 0;
 }
